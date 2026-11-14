@@ -10,7 +10,7 @@ public class ConnectionFactory {
 
     public ConnectionFactory(){
         BasicDataSource basicDataSource = new BasicDataSource();
-        basicDataSource.setUrl("jdbc:mysql:DB_HOST/DB_NAME");
+        basicDataSource.setUrl("jdbc:mysql://DB_HOST:DB_PORT/DB_NAME");
         basicDataSource.setUsername("DB_USER");
         basicDataSource.setPassword("DB_PASS");
 
