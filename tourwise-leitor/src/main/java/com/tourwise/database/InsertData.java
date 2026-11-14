@@ -8,7 +8,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 public class InsertData {
-    private ConnectionFactory connectionFactory;
+    private final ConnectionFactory connectionFactory;
 
     public InsertData() {
         this.connectionFactory = new ConnectionFactory();

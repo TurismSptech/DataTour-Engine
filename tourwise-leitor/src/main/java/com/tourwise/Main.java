@@ -3,6 +3,9 @@ package com.tourwise;
 import com.tourwise.database.InsertData;
 import com.tourwise.excel.LeitorPlanilha;
 import com.tourwise.model.Hospedagem;
+import com.tourwise.notifications.NotificacaoService;
+import com.tourwise.notifications.SlackService;
+import io.github.cdimascio.dotenv.Dotenv;
 import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
 import java.io.File;
@@ -19,6 +22,11 @@ public class Main {
     public static final String ANSI_BLUE = "\u001B[34m";
 
     public static void main(String[] args) throws Exception {
+        Dotenv dotenv = Dotenv.load();
+
+        SlackService slackService = new SlackService(dotenv.get("SLACK_API_TOKEN"));
+        NotificacaoService notificacaoService = new NotificacaoService(slackService);
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
         System.out.println(LocalDateTime.now().format(formatter) +
@@ -71,7 +79,7 @@ public class Main {
                 List<Hospedagem> hospedagens = new LeitorPlanilha().ler(path);
                 Integer qtdRegistroIncompleto = 0;
 
-                for (int i = 0; i < hospedagens.size(); i++) {
+                for (int i = 0; i < 5; i++) {
                     if(!insert.temTodosAtributosPreenchidos(hospedagens.get(i))){ qtdRegistroIncompleto++; }
 
                     insert.insertHosp(hospedagens.get(i));
@@ -104,6 +112,8 @@ public class Main {
                         " - Verificando se há mais novas planilhas\n");
 
                 insert.gravarNomeDePlanilhaLida(arquivo.getName());
+                notificacaoService.notificarNovosDados(arquivo.getName(), hospedagens.size());
+
             }
         }
 
@@ -116,6 +126,7 @@ public class Main {
                 ANSI_BLUE + " - [INFO]" +
                 "[SYSTEM]" + ANSI_RESET +
                 " - Programa encerrado" + "\n");
+
     }
 
 }
