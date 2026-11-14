@@ -1,3 +1,5 @@
 .idea/
 
 tourwise-leitor/src/main/java/com/tourwise/database/ConnectionFactory.java
+
+.env
