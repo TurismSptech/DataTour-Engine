@@ -1,0 +1,49 @@
+package com.tourwise.database;
+
+import io.github.cdimascio.dotenv.Dotenv;
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+class ConnectionFactory {
+    private final JdbcTemplate jdbcTemplate;
+    private final BasicDataSource basicDataSource;
+
+    public ConnectionFactory() {
+        Dotenv dotenv = Dotenv.configure()
+                .directory(".")
+                .ignoreIfMissing()
+                .load();
+
+        String host = requiredSetting(dotenv, "DB_HOST");
+        String port = requiredSetting(dotenv, "DB_PORT");
+        String database = requiredSetting(dotenv, "DB_NAME");
+        String username = requiredSetting(dotenv, "DB_USER");
+        String password = requiredSetting(dotenv, "DB_PASS");
+
+        this.basicDataSource = new BasicDataSource();
+        this.basicDataSource.setUrl("jdbc:mysql://" + host + ":" + port + "/" + database);
+        this.basicDataSource.setUsername(username);
+        this.basicDataSource.setPassword(password);
+        this.jdbcTemplate = new JdbcTemplate(basicDataSource);
+    }
+
+    private static String requiredSetting(Dotenv dotenv, String key) {
+            String value = System.getenv(key);
+            if (value == null || value.isBlank()) {
+                value = dotenv.get(key);
+            }
+            if (value == null || value.isBlank()) {
+                throw new IllegalStateException("Missing required configuration: " + key
+                        + ". Set it in the root .env file or as an environment variable.");
+            }
+            return value.trim();
+        }
+
+    public BasicDataSource getBasicDataSource() {
+        return basicDataSource;
+    }
+
+    public JdbcTemplate getJdbcTemplate() {
+        return jdbcTemplate;
+    }
+}
