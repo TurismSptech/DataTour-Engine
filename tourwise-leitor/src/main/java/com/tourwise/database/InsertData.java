@@ -53,9 +53,9 @@ public class InsertData {
         }
 
         //Insert hospedagem
-        template.update("INSERT INTO hospedagem (cnpj, tipo_hospedagem, nome_fantasia, email_comercial, uni_habit, leitos, uni_habit_acess, leito_acess, dt_abertura, website, porte, validade_certificado)" +
-                        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
-                h.getCnpj(), h.getTipoHospedagem(), h.getNomeFantasia(), h.getEmailComercial(), h.getUniHabit(),
+        template.update("INSERT INTO hospedagem (cnpj, fk_tipo_hospedagem, nome_fantasia, email_comercial, uni_habit, leitos, uni_habit_acess, leito_acess, dt_abertura, website, porte, validade_certificado)" +
+                        "VALUES (?,1,?,?,?,?,?,?,?,?,?,?)",
+                h.getCnpj(), h.getNomeFantasia(), h.getEmailComercial(), h.getUniHabit(),
                 h.getLeitos(), h.getUniHabit(), h.getLeitosAcess(), h.getDtAbertura(), h.getWebsite(),
                 h.getPorte(), h.getValidade_certificado()
         );
@@ -94,7 +94,7 @@ public class InsertData {
 
         List<String> nomePlanilhasLidas = new ArrayList<>();
 
-        List<Leitura> leituras = template.query("SELECT * FROM leitura;", new BeanPropertyRowMapper<>(Leitura.class));
+        List<Leitura> leituras = template.query("SELECT * FROM historico_leitura_arquivo;", new BeanPropertyRowMapper<>(Leitura.class));
 
         for (Leitura leitura : leituras) {
             nomePlanilhasLidas.add(leitura.getNome_arquivo());
@@ -106,7 +106,7 @@ public class InsertData {
     public void gravarNomeDePlanilhaLida(String nome) {
         JdbcTemplate template = connectionFactory.getJdbcTemplate();
 
-        template.update("INSERT INTO leitura (nome_arquivo) VALUES (?)", nome);
+        template.update("INSERT INTO historico_leitura_arquivo (nome_arquivo) VALUES (?)", nome);
     }
 
     public boolean temTodosAtributosPreenchidos(Hospedagem h) throws IllegalAccessException {
