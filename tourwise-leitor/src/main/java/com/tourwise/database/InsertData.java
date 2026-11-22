@@ -8,7 +8,7 @@ import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.*;
 
-public class InsertData {
+public class  InsertData {
     private final ConnectionFactory connectionFactory;
 
     public InsertData() {
@@ -59,10 +59,29 @@ public class InsertData {
             }
         }
 
+        List<String> tipos_hospedagem = template.queryForList("SELECT tipo_hospedagem FROM tipo_hospedagem", String.class);
+        String tipoAtual = "";
+        Integer fk_tipo_hospedagem = 0;
+        //Insert Idiomas
+        if (h.getTipoHospedagem() != null) {
+            tipoAtual = h.getTipoHospedagem();
+
+            if (!tipos_hospedagem.contains(tipoAtual)) {
+                template.update("INSERT INTO tipo_hospedagem (tipo_hospedagem) VALUES (?)", tipoAtual);
+                fk_tipo_hospedagem = template.queryForObject("SELECT MAX(id_tipo_hospedagem) FROM tipo_hospedagem", Integer.class);
+            }else{
+                for (String tipo : tipos_hospedagem) {
+                    if(tipo.equalsIgnoreCase(tipoAtual)){
+                        fk_tipo_hospedagem = template.queryForObject("SELECT id_tipo_hospedagem FROM tipo_hospedagem WHERE tipo_hospedagem = ? ", Integer.class, tipoAtual);
+                    }
+                }
+            }
+        }
+
         //Insert hospedagem
         template.update("INSERT INTO hospedagem (cnpj, fk_tipo_hospedagem, nome_fantasia, email_comercial, uni_habit, leitos, uni_habit_acess, leito_acess, dt_abertura, website, porte, validade_certificado)" +
-                        "VALUES (?,1,?,?,?,?,?,?,?,?,?,?)",
-                h.getCnpj(), h.getNomeFantasia(), h.getEmailComercial(), h.getUniHabit(),
+                        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                h.getCnpj(), fk_tipo_hospedagem,h.getNomeFantasia(), h.getEmailComercial(), h.getUniHabit(),
                 h.getLeitos(), h.getUniHabit(), h.getLeitosAcess(), h.getDtAbertura(), h.getWebsite(),
                 h.getPorte(), h.getValidade_certificado()
         );
