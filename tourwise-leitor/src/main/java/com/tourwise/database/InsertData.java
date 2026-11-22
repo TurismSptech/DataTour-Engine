@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.lang.reflect.Field;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class InsertData {
@@ -12,6 +13,12 @@ public class InsertData {
 
     public InsertData() {
         this.connectionFactory = new ConnectionFactory();
+    }
+
+    public void insertJavaLog(String log, LocalDateTime date) {
+        JdbcTemplate template = connectionFactory.getJdbcTemplate();
+
+        template.update("INSERT INTO java_logs (mensagem, data_hora_log) VALUES (?, ?)", log, date);
     }
 
     public void insertHosp(Hospedagem h) {
@@ -53,9 +60,9 @@ public class InsertData {
         }
 
         //Insert hospedagem
-        template.update("INSERT INTO hospedagem (cnpj, tipo_hospedagem, nome_fantasia, email_comercial, uni_habit, leitos, uni_habit_acess, leito_acess, dt_abertura, website, porte, validade_certificado)" +
-                        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
-                h.getCnpj(), h.getTipoHospedagem(), h.getNomeFantasia(), h.getEmailComercial(), h.getUniHabit(),
+        template.update("INSERT INTO hospedagem (cnpj, fk_tipo_hospedagem, nome_fantasia, email_comercial, uni_habit, leitos, uni_habit_acess, leito_acess, dt_abertura, website, porte, validade_certificado)" +
+                        "VALUES (?,1,?,?,?,?,?,?,?,?,?,?)",
+                h.getCnpj(), h.getNomeFantasia(), h.getEmailComercial(), h.getUniHabit(),
                 h.getLeitos(), h.getUniHabit(), h.getLeitosAcess(), h.getDtAbertura(), h.getWebsite(),
                 h.getPorte(), h.getValidade_certificado()
         );
@@ -94,7 +101,7 @@ public class InsertData {
 
         List<String> nomePlanilhasLidas = new ArrayList<>();
 
-        List<Leitura> leituras = template.query("SELECT * FROM leitura;", new BeanPropertyRowMapper<>(Leitura.class));
+        List<Leitura> leituras = template.query("SELECT * FROM historico_leitura_arquivo;", new BeanPropertyRowMapper<>(Leitura.class));
 
         for (Leitura leitura : leituras) {
             nomePlanilhasLidas.add(leitura.getNome_arquivo());
@@ -106,7 +113,7 @@ public class InsertData {
     public void gravarNomeDePlanilhaLida(String nome) {
         JdbcTemplate template = connectionFactory.getJdbcTemplate();
 
-        template.update("INSERT INTO leitura (nome_arquivo) VALUES (?)", nome);
+        template.update("INSERT INTO historico_leitura_arquivo (nome_arquivo, data_hora_leitura) VALUES (?, ?)", nome, LocalDateTime.now());
     }
 
     public boolean temTodosAtributosPreenchidos(Hospedagem h) throws IllegalAccessException {
