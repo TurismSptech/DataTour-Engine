@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.lang.reflect.Field;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class InsertData {
@@ -12,6 +13,12 @@ public class InsertData {
 
     public InsertData() {
         this.connectionFactory = new ConnectionFactory();
+    }
+
+    public void insertJavaLog(String log, LocalDateTime date) {
+        JdbcTemplate template = connectionFactory.getJdbcTemplate();
+
+        template.update("INSERT INTO java_logs (mensagem, data_hora_log) VALUES (?, ?)", log, date);
     }
 
     public void insertHosp(Hospedagem h) {
@@ -106,7 +113,7 @@ public class InsertData {
     public void gravarNomeDePlanilhaLida(String nome) {
         JdbcTemplate template = connectionFactory.getJdbcTemplate();
 
-        template.update("INSERT INTO historico_leitura_arquivo (nome_arquivo) VALUES (?)", nome);
+        template.update("INSERT INTO historico_leitura_arquivo (nome_arquivo, data_hora_leitura) VALUES (?, ?)", nome, LocalDateTime.now());
     }
 
     public boolean temTodosAtributosPreenchidos(Hospedagem h) throws IllegalAccessException {
