@@ -10,19 +10,23 @@ import io.github.cdimascio.dotenv.Dotenv;
 import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
 import java.io.File;
-
+import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
     public static void main(String[] args) throws Exception {
         Dotenv dotenv = Dotenv.load();
-        SlackService slackService = new SlackService(dotenv.get("SLACK_API_TOKEN"));
-        NotificacaoService notificacaoService = new NotificacaoService(slackService);
+        SlackService slackServiceUsers = new SlackService(dotenv.get("SLACK_API_TOKEN_USERS"));
+        SlackService slackServiceDevs = new SlackService(dotenv.get("SLACK_API_TOKEN_DEV"));
+        NotificacaoService notificacaoServiceUsers = new NotificacaoService(slackServiceUsers);
+        NotificacaoService notificacaoServiceDev = new NotificacaoService(slackServiceDevs);
+        Integer qtdHosp = 0;
+        List<String> arquivosLidos = new ArrayList<>();
 
         Log.log("Programa iniciado", "");
 
         //definir caminho da pasta de leitura
-        File caminho = new File("/home/hugo/Desktop/S3");
+        File caminho = new File("/Users/icaro/OneDrive/Desktop/xlsx-tourwise");
 
         File[] arquivos = caminho.listFiles();
         InsertData insert = new InsertData();
@@ -64,12 +68,16 @@ public class Main {
                 Log.log("Registrando no banco que a planilha já foi lida", "green");
                 Log.log("Notificando via Slack sobre a nova planilha", "blue");
 
+
                 insert.gravarNomeDePlanilhaLida(arquivo.getName());
-                notificacaoService.notificarNovosDados(arquivo.getName(), hospedagens.size());
+                arquivosLidos.add(arquivo.getName());
+                notificacaoServiceUsers.notificarNovosDados(arquivo.getName(), hospedagens.size());
+                qtdHosp = hospedagens.size();
             }
         }
 
         Log.log("Nenhuma planilha nova encontrada", "yellow");
         Log.log("Programa encerrado", "blue");
+        notificacaoServiceDev.notificarExecucao(arquivosLidos, qtdHosp);
     }
 }
