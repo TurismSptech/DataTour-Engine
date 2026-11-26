@@ -11,6 +11,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import java.io.File;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -24,10 +25,10 @@ public class LeitorPlanilha {
     private final Map<String, Integer> colunas = new HashMap<>();
 
     //le o arquivo inteiro
-    public List<Hospedagem> ler(String caminho) throws Exception {
+    public List<Hospedagem> ler(InputStream entrada) throws Exception {
         List<Hospedagem> lista = new ArrayList<>();
 
-        try (Workbook wb = WorkbookFactory.create(new File(caminho))) {
+        try (Workbook wb = WorkbookFactory.create(entrada)) {
             Sheet sheet = wb.getSheetAt(0);
 
             //pega o nome das colunas
